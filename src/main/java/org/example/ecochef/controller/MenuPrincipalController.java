@@ -1,9 +1,9 @@
-package org.example.ecochef;
+package org.example.ecochef.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
-public class HelloController {
+public class MenuPrincipalController {
     @FXML
     private Label welcomeText;
 
