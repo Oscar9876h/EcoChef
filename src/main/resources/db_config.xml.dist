@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Configuracion>
+    <host></host>
+    <port></port>
+    <database></database>
+    <user></user>
+    <password></password>
+</Configuracion>
