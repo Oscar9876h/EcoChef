@@ -5,6 +5,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.io.InputStream;
 
 public class XMLManager {
 
@@ -24,13 +25,35 @@ public class XMLManager {
         return result;
     }
 
+    // Este método lo seguimos dejando para archivos externos (como exportaciones)
     public static <T> T readXML(T c, String filename) {
         T result = c;
-        JAXBContext context;
         try {
-            context = JAXBContext.newInstance(c.getClass());
+            JAXBContext context = JAXBContext.newInstance(c.getClass());
             Unmarshaller um = context.createUnmarshaller();
             result = (T) um.unmarshal(new File(filename));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * NUEVO MÉTODO: Lee archivos que están dentro de la carpeta resources.
+     * Úsalo para cargar el db_config.xml.
+     */
+    public static <T> T readXMLFromResources(Class<T> clazz, String resourcePath) {
+        T result = null;
+        try {
+            JAXBContext context = JAXBContext.newInstance(clazz);
+            Unmarshaller um = context.createUnmarshaller();
+            // Esto busca el archivo dentro del paquete compilado
+            InputStream is = clazz.getResourceAsStream(resourcePath);
+            if (is == null) {
+                System.err.println("❌ No se encontró el recurso: " + resourcePath);
+                return null;
+            }
+            result = (T) um.unmarshal(is);
         } catch (JAXBException e) {
             e.printStackTrace();
         }
