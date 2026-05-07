@@ -5,7 +5,16 @@ package org.example.ecochef.model;
  * Todas las clases que se guardan en la DB heredan de aquí.
  */
 public abstract class EntidadBase {
-    protected int id; // Usamos protected para que las hijas lo vean
+    protected int id;
+
+    // Constructor vacío (necesario para JavaFX y DAOs)
+    public EntidadBase() {
+    }
+
+    // NUEVO: Constructor con parámetros que invoca la hija
+    public EntidadBase(int id) {
+        this.id = id;
+    }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

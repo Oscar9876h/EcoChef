@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.ecochef.controller.RegistroController">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+
+    <Label text="Crear Nueva Cuenta">
+        <font>
+            <Font name="System Bold" size="20.0" />
+        </font>
+    </Label>
+
+    <Label text="Selecciona tu perfil:" />
+    <ComboBox fx:id="comboTipoUsuario" prefWidth="200.0" promptText="Tipo de Usuario">
+        <items>
+            <FXCollections fx:factory="observableArrayList">
+                <String fx:value="USUARIO" />
+                <String fx:value="ADMIN" />
+            </FXCollections>
+        </items>
+    </ComboBox>
+
+    <TextField fx:id="txtNombre" promptText="Nombre de usuario" />
+    <TextField fx:id="txtEmail" promptText="Correo electrónico" />
+    <PasswordField fx:id="txtPassword" promptText="Contraseña" />
+
+    <Button fx:id="btnRegistrar" onAction="#handleRegistro" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Registrarme" />
+    <Hyperlink fx:id="irALogin" onAction="#irALogin" text="¿Ya tienes cuenta? Inicia sesión" />
+</VBox>

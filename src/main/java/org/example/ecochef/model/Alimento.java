@@ -31,9 +31,6 @@ public class Alimento extends EntidadBase {
         this.idCategoriaAlimento = idCategoriaAlimento;
     }
 
-    // --- GETTERS Y SETTERS ---
-    // El getId() y setId() ya no hace falta escribirlos, ¡se heredan!
-
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
