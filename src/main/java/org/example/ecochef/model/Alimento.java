@@ -1,8 +1,9 @@
 package org.example.ecochef.model;
 
+import java.time.LocalDate;
+
 /**
- * Clase Alimento optimizada con herencia.
- * Hereda de EntidadBase para centralizar la gestión de IDs.
+ * Clase Alimento optimizada con herencia y gestión de fechas.
  */
 public class Alimento extends EntidadBase {
 
@@ -10,10 +11,10 @@ public class Alimento extends EntidadBase {
     private String tipo;
     private int calorias;
     private int idCategoriaAlimento;
+    private LocalDate fechaCaducidad; // <-- Nuevo atributo
 
     /**
      * Constructor vacío (Sobrecarga 1)
-     * Necesario para frameworks de persistencia y JAXB.
      */
     public Alimento() {
         super();
@@ -21,16 +22,17 @@ public class Alimento extends EntidadBase {
 
     /**
      * Constructor completo (Sobrecarga 2)
-     * @param id El ID que se pasa a la clase madre EntidadBase
      */
-    public Alimento(int id, String nombre, String tipo, int calorias, int idCategoriaAlimento) {
-        this.id = id; // Atributo heredado de EntidadBase
+    public Alimento(int id, String nombre, String tipo, int calorias, int idCategoriaAlimento, LocalDate fechaCaducidad) {
+        this.id = id;
         this.nombre = nombre;
         this.tipo = tipo;
         this.calorias = calorias;
         this.idCategoriaAlimento = idCategoriaAlimento;
+        this.fechaCaducidad = fechaCaducidad; // <-- Inicialización
     }
 
+    // Getters y Setters existentes
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
@@ -43,8 +45,12 @@ public class Alimento extends EntidadBase {
     public int getIdCategoriaAlimento() { return idCategoriaAlimento; }
     public void setIdCategoriaAlimento(int idCategoriaAlimento) { this.idCategoriaAlimento = idCategoriaAlimento; }
 
+    // --- NUEVOS MÉTODOS PARA LA FECHA ---
+    public LocalDate getFechaCaducidad() { return fechaCaducidad; }
+    public void setFechaCaducidad(LocalDate fechaCaducidad) { this.fechaCaducidad = fechaCaducidad; }
+
     @Override
     public String toString() {
-        return "Alimento{id=" + id + ", nombre='" + nombre + "', tipo='" + tipo + "'}";
+        return "Alimento{id=" + id + ", nombre='" + nombre + "', tipo='" + tipo + "', caducidad=" + fechaCaducidad + "}";
     }
 }

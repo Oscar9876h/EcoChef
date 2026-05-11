@@ -26,15 +26,14 @@ public class RegistroController {
      */
     @FXML
     public void initialize() {
-        // Rellenar el ComboBox (opcional si ya lo haces en SceneBuilder)
+        // Rellenar el ComboBox
         if (comboTipoUsuario.getItems().isEmpty()) {
             comboTipoUsuario.getItems().addAll("Chef", "Comensal", "Administrador");
         }
 
-        // REQUISITO: Desactivar controles que no se pueden usar (el botón empieza apagado)
+
         btnRegistrar.setDisable(true);
 
-        // REQUISITO: Uso de Expresiones Lambda para escuchar cambios en los campos
         txtNombre.textProperty().addListener((obs, old, newValue) -> validarCampos());
         txtEmail.textProperty().addListener((obs, old, newValue) -> validarCampos());
         txtPassword.textProperty().addListener((obs, old, newValue) -> validarCampos());
