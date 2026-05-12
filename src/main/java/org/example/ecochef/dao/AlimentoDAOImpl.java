@@ -109,4 +109,32 @@ public class AlimentoDAOImpl implements Dao<Alimento> {
     public Alimento buscarPorId(int id) {
         return null;
     }
+
+    public List<Alimento> listarProximosACaducar() {
+        List<Alimento> lista = new ArrayList<>();
+        // Buscamos alimentos que caduquen desde HOY hasta dentro de 7 días
+        String sql = "SELECT * FROM alimentos WHERE fecha_caducidad <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) ORDER BY fecha_caducidad ASC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Alimento a = new Alimento();
+                a.setId(rs.getInt("id_alimentos"));
+                a.setNombre(rs.getString("nombre"));
+                a.setTipo(rs.getString("tipo"));
+                a.setCalorias(rs.getInt("calorias"));
+
+                Date fechaSql = rs.getDate("fecha_caducidad");
+                if (fechaSql != null) {
+                    a.setFechaCaducidad(fechaSql.toLocalDate());
+                }
+                lista.add(a);
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error en filtro caducidad: " + e.getMessage());
+        }
+        return lista;
+    }
 }

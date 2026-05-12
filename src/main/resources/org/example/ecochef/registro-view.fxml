@@ -3,6 +3,7 @@
 <?import java.lang.*?>
 <?import javafx.collections.*?>
 <?import javafx.geometry.*?>
+<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
@@ -34,4 +35,7 @@
 
     <Button fx:id="btnRegistrar" onAction="#handleRegistro" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Registrarme" />
     <Hyperlink fx:id="irALogin" onAction="#irALogin" text="¿Ya tienes cuenta? Inicia sesión" />
+   <cursor>
+      <Cursor fx:constant="S_RESIZE" />
+   </cursor>
 </VBox>
