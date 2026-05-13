@@ -1,6 +1,7 @@
 package org.example.ecochef.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
@@ -11,6 +12,7 @@ import org.example.ecochef.dao.RecetaDAOImpl;
 import org.example.ecochef.model.Alimento;
 import org.example.ecochef.model.Receta;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -53,65 +55,55 @@ public class MenuPrincipalController {
         actualizarVistaRecetas(recetaDAO.listarTodos());
     }
 
-    /**
-     * Carga las recetas e incluye el botón de verificación de ingredientes
-     */
     private void actualizarVistaRecetas(List<Receta> lista) {
         flowAlimentos.getChildren().clear();
 
         if (lista.isEmpty()) {
-            Label mensaje = new Label("No hay recetas disponibles en la base de datos.");
-            mensaje.setStyle("-fx-text-fill: #7f8c8d; -fx-padding: 20;");
-            flowAlimentos.getChildren().add(mensaje);
+            flowAlimentos.getChildren().add(new Label("No hay recetas disponibles."));
             return;
         }
 
         for (Receta receta : lista) {
-            VBox tarjeta = new VBox(8);
-            tarjeta.setStyle("-fx-background-color: #ffffff; -fx-padding: 15; -fx-border-color: #3498db; " +
-                    "-fx-border-radius: 10; -fx-background-radius: 10; " +
-                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
-            tarjeta.setPrefWidth(200);
+            try {
+                // Cargamos la plantilla que diseñaste en Scene Builder
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/tarjeta-receta.fxml"));
+                VBox tarjeta = loader.load();
 
-            Label lbNombre = new Label(receta.getNombreReceta().toUpperCase());
-            lbNombre.setStyle("-fx-font-weight: bold; -fx-text-fill: #2980b9;");
+                // Buscamos los elementos por el fx:id que pusiste en Scene Builder
+                Label lbNombre = (Label) tarjeta.lookup("#lbNombre");
+                Label lbTiempo = (Label) tarjeta.lookup("#lbTiempo");
+                Label lbDesc = (Label) tarjeta.lookup("#lbDesc");
+                Button btnCheck = (Button) tarjeta.lookup("#btnCheck");
+                Button btnEliminar = (Button) tarjeta.lookup("#btnEliminar");
 
-            Label lbTiempo = new Label("⏱ " + receta.getTiempoPreparacion() + " min");
-            lbTiempo.setStyle("-fx-font-size: 11px; -fx-text-fill: #7f8c8d;");
+                // Seteamos los datos
+                if (lbNombre != null) lbNombre.setText(receta.getNombreReceta().toUpperCase());
+                if (lbTiempo != null) lbTiempo.setText("⏱ " + receta.getTiempoPreparacion() + " min");
+                if (lbDesc != null) lbDesc.setText(receta.getDescripcion());
 
-            Label lbDesc = new Label(receta.getDescripcion());
-            lbDesc.setStyle("-fx-font-size: 10px;");
-            lbDesc.setWrapText(true);
-            lbDesc.setMaxHeight(50);
+                if (btnCheck != null) {
+                    btnCheck.setOnAction(event -> {
+                        String disponibilidad = recetaDAO.comprobarDisponibilidad(receta.getId());
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("EcoChef - Verificador");
+                        alert.setHeaderText("Ingredientes para " + receta.getNombreReceta());
+                        alert.setContentText(disponibilidad);
+                        alert.showAndWait();
+                    });
+                }
 
-            // --- NUEVO: Botón de Comprobación de Ingredientes ---
-            Button btnCheck = new Button("¿Tengo los ingredientes?");
-            btnCheck.setMaxWidth(Double.MAX_VALUE);
-            btnCheck.setStyle("-fx-background-color: #f1c40f; -fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 10px;");
+                if (btnEliminar != null) {
+                    btnEliminar.setOnAction(event -> {
+                        recetaDAO.eliminar(receta.getId());
+                        mostrarRecetas();
+                    });
+                }
 
-            btnCheck.setOnAction(event -> {
-                // Llama al método que añadimos al RecetaDAOImpl
-                String disponibilidad = recetaDAO.comprobarDisponibilidad(receta.getId());
+                flowAlimentos.getChildren().add(tarjeta);
 
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("EcoChef - Verificador");
-                alert.setHeaderText("Ingredientes para " + receta.getNombreReceta());
-                alert.setContentText(disponibilidad);
-                alert.showAndWait();
-            });
-
-            Button btnEliminar = new Button("Borrar Receta");
-            btnEliminar.setMaxWidth(Double.MAX_VALUE);
-            btnEliminar.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px; -fx-cursor: hand;");
-
-            btnEliminar.setOnAction(event -> {
-                recetaDAO.eliminar(receta.getId());
-                mostrarRecetas();
-            });
-
-            // Añadimos todos los elementos a la tarjeta
-            tarjeta.getChildren().addAll(lbNombre, lbTiempo, lbDesc, btnCheck, btnEliminar);
-            flowAlimentos.getChildren().add(tarjeta);
+            } catch (IOException e) {
+                System.err.println("Error cargando tarjeta-receta.fxml: " + e.getMessage());
+            }
         }
     }
 
@@ -119,62 +111,67 @@ public class MenuPrincipalController {
         flowAlimentos.getChildren().clear();
 
         if (lista.isEmpty()) {
-            String msg = esVistaCaducidad ? "✅ No hay alimentos que caduquen pronto." : "Tu despensa está vacía.";
-            Label lbVacío = new Label(msg);
-            lbVacío.setStyle("-fx-text-fill: #7f8c8d; -fx-padding: 20;");
-            flowAlimentos.getChildren().add(lbVacío);
+            String msg = esVistaCaducidad ? "✅ No hay alimentos próximos a caducar." : "Tu despensa está vacía.";
+            flowAlimentos.getChildren().add(new Label(msg));
             return;
         }
 
         for (Alimento alimento : lista) {
-            VBox tarjeta = crearTarjeta(alimento, esVistaCaducidad);
-            flowAlimentos.getChildren().add(tarjeta);
+            try {
+                // Reutilizamos la misma plantilla para alimentos
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/tarjeta-receta.fxml"));
+                VBox tarjeta = loader.load();
+
+                Label lbNombre = (Label) tarjeta.lookup("#lbNombre");
+                Label lbInfo = (Label) tarjeta.lookup("#lbTiempo"); // Usamos este para el tipo/calorías
+                Label lbFecha = (Label) tarjeta.lookup("#lbDesc");   // Usamos este para la fecha
+                Button btnCheck = (Button) tarjeta.lookup("#btnCheck"); // No lo necesitamos en alimentos
+                Button btnEliminar = (Button) tarjeta.lookup("#btnEliminar");
+
+                // Configurar datos del alimento
+                if (lbNombre != null) lbNombre.setText(alimento.getNombre().toUpperCase());
+                if (lbInfo != null) lbInfo.setText(alimento.getTipo() + " | " + alimento.getCalorias() + " cal");
+
+                String fechaStr = (alimento.getFechaCaducidad() != null) ? alimento.getFechaCaducidad().toString() : "S/F";
+                if (lbFecha != null) lbFecha.setText("📅 " + fechaStr);
+
+                // Ocultamos el botón de ingredientes porque es un alimento suelto
+                if (btnCheck != null) {
+                    btnCheck.setVisible(false);
+                    btnCheck.setManaged(false);
+                }
+
+                // Cambiamos el color del borde dinámicamente según si es caducidad o no
+                String colorBorde = esVistaCaducidad ? "#e67e22" : "#27ae60";
+                tarjeta.setStyle(tarjeta.getStyle() + "-fx-border-color: " + colorBorde + ";");
+
+                if (btnEliminar != null) {
+                    btnEliminar.setText("Eliminar Alimento");
+                    btnEliminar.setOnAction(event -> {
+                        alimentoDAO.eliminar(alimento.getId());
+                        if (esVistaCaducidad) mostrarCaducidad(); else mostrarDespensa();
+                    });
+                }
+
+                flowAlimentos.getChildren().add(tarjeta);
+
+            } catch (IOException e) {
+                System.err.println("Error cargando plantilla en alimentos: " + e.getMessage());
+            }
         }
-    }
-
-    private VBox crearTarjeta(Alimento alimento, boolean esVistaCaducidad) {
-        VBox tarjeta = new VBox(8);
-        String colorBorde = esVistaCaducidad ? "#e67e22" : "#27ae60";
-        tarjeta.setStyle("-fx-background-color: #ffffff; -fx-padding: 15; -fx-border-color: " + colorBorde + "; " +
-                "-fx-border-radius: 10; -fx-background-radius: 10; " +
-                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
-        tarjeta.setPrefWidth(160);
-
-        Label lbNombre = new Label(alimento.getNombre().toUpperCase());
-        lbNombre.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
-
-        Label lbInfo = new Label(alimento.getTipo() + " | " + alimento.getCalorias() + " cal");
-        lbInfo.setStyle("-fx-font-size: 11px; -fx-text-fill: #7f8c8d;");
-
-        String fechaStr = (alimento.getFechaCaducidad() != null) ? alimento.getFechaCaducidad().toString() : "S/F";
-        Label lbFecha = new Label("📅 " + fechaStr);
-        lbFecha.setStyle("-fx-font-size: 10px; -fx-text-fill: " + (esVistaCaducidad ? "#c0392b" : "#2c3e50") + ";");
-
-        Button btnEliminar = new Button("Eliminar");
-        btnEliminar.setMaxWidth(Double.MAX_VALUE);
-        btnEliminar.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px; -fx-cursor: hand; -fx-font-weight: bold;");
-
-        btnEliminar.setOnAction(event -> {
-            alimentoDAO.eliminar(alimento.getId());
-            if (esVistaCaducidad) mostrarCaducidad(); else mostrarDespensa();
-        });
-
-        tarjeta.getChildren().addAll(lbNombre, lbInfo, lbFecha, btnEliminar);
-        return tarjeta;
     }
 
     @FXML
     public void abrirFormularioAñadir() {
         Dialog<Alimento> dialog = new Dialog<>();
         dialog.setTitle("Nuevo Alimento");
-        dialog.setHeaderText("Añadir detalles del alimento");
 
         ButtonType guardarButtonType = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(guardarButtonType, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
         grid.setHgap(10); grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
 
         TextField txtNombre = new TextField();
         ComboBox<String> comboTipo = new ComboBox<>();
