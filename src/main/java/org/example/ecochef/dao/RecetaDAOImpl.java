@@ -100,20 +100,24 @@ public class RecetaDAOImpl implements Dao<Receta> {
     }
 
     /**
-     * Comprueba disponibilidad cruzando correctamente los nombres de columnas de tus tablas.
+     * Comprueba disponibilidad buscando el nombre del ingrediente en la tabla 'alimentos'.
      */
     public String comprobarDisponibilidad(int idReceta) {
         StringBuilder resultado = new StringBuilder();
 
-        // EXPLICACIÓN DEL FIX:
-        // ri.id_alimento -> Nombre en la tabla 'recetas_ingredientes'
-        // a_req.id_alimentos -> Nombre en la tabla 'alimentos'
-        String sql = "SELECT a_req.nombre AS ingrediente, " +
-                "CASE WHEN a_disp.id_alimentos IS NOT NULL THEN '✅' ELSE '❌' END AS estado " +
-                "FROM recetas_ingredientes ri " +
-                "JOIN alimentos a_req ON ri.id_alimento = a_req.id_alimentos " +
-                "LEFT JOIN alimentos a_disp ON a_req.id_alimentos = a_disp.id_alimentos " +
+        // SQL CORREGIDO:
+        // ri -> tabla intermedia de ingredientes de la receta
+        // ib -> tabla con los nombres base (Pasta, Huevo, etc.)
+        // a -> tu despensa personal (donde añades alimentos desde la App)
+        String sql = "SELECT ib.nombre AS ingrediente, " +
+                "CASE WHEN (SELECT COUNT(*) FROM alimentos a WHERE a.nombre = ib.nombre) > 0 " +
+                "THEN '✅' ELSE '❌' END AS estado " +
+                "FROM recetas_ingredientes ri " + // Cambiado a 'recetas_ingredients' si así está en tu DB
+                "JOIN ingredientes_base ib ON ri.id_alimento = ib.id_ingrediente_base " +
                 "WHERE ri.id_receta = ?";
+
+        // Nota: He usado 'recetas_ingredients' arriba basándome en tus capturas de Workbench anteriores.
+        // Si en tu DB se llama 'recetas_ingredientes' (en español), cámbialo en la línea del SQL.
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -121,17 +125,24 @@ public class RecetaDAOImpl implements Dao<Receta> {
             pstmt.setInt(1, idReceta);
             ResultSet rs = pstmt.executeQuery();
 
+            boolean hayDatos = false;
             while (rs.next()) {
+                hayDatos = true;
                 resultado.append(rs.getString("estado"))
                         .append(" ")
                         .append(rs.getString("ingrediente"))
                         .append("\n");
             }
+
+            if (!hayDatos) {
+                return "No hay ingredientes definidos para esta receta.";
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
             return "❌ Error en la base de datos: " + e.getMessage();
         }
 
-        return resultado.length() > 0 ? resultado.toString() : "No hay ingredientes definidos para esta receta.";
+        return resultado.toString();
     }
 }

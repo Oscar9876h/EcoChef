@@ -23,8 +23,8 @@ public class MenuPrincipalController {
     @FXML private Label tituloSeccion;
     @FXML private Button btnAñadirAlimento;
 
-    private AlimentoDAOImpl alimentoDAO = new AlimentoDAOImpl();
-    private RecetaDAOImpl recetaDAO = new RecetaDAOImpl();
+    private final AlimentoDAOImpl alimentoDAO = new AlimentoDAOImpl();
+    private final RecetaDAOImpl recetaDAO = new RecetaDAOImpl();
 
     @FXML
     public void initialize() {
@@ -55,6 +55,9 @@ public class MenuPrincipalController {
         actualizarVistaRecetas(recetaDAO.listarTodos());
     }
 
+    /**
+     * Llena el panel con tarjetas de recetas usando el FXML de Scene Builder
+     */
     private void actualizarVistaRecetas(List<Receta> lista) {
         flowAlimentos.getChildren().clear();
 
@@ -65,18 +68,16 @@ public class MenuPrincipalController {
 
         for (Receta receta : lista) {
             try {
-                // Cargamos la plantilla que diseñaste en Scene Builder
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/tarjeta-receta.fxml"));
                 VBox tarjeta = loader.load();
 
-                // Buscamos los elementos por el fx:id que pusiste en Scene Builder
+                // Enlace con los IDs del Scene Builder
                 Label lbNombre = (Label) tarjeta.lookup("#lbNombre");
                 Label lbTiempo = (Label) tarjeta.lookup("#lbTiempo");
                 Label lbDesc = (Label) tarjeta.lookup("#lbDesc");
                 Button btnCheck = (Button) tarjeta.lookup("#btnCheck");
                 Button btnEliminar = (Button) tarjeta.lookup("#btnEliminar");
 
-                // Seteamos los datos
                 if (lbNombre != null) lbNombre.setText(receta.getNombreReceta().toUpperCase());
                 if (lbTiempo != null) lbTiempo.setText("⏱ " + receta.getTiempoPreparacion() + " min");
                 if (lbDesc != null) lbDesc.setText(receta.getDescripcion());
@@ -84,11 +85,7 @@ public class MenuPrincipalController {
                 if (btnCheck != null) {
                     btnCheck.setOnAction(event -> {
                         String disponibilidad = recetaDAO.comprobarDisponibilidad(receta.getId());
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("EcoChef - Verificador");
-                        alert.setHeaderText("Ingredientes para " + receta.getNombreReceta());
-                        alert.setContentText(disponibilidad);
-                        alert.showAndWait();
+                        mostrarAlerta("Ingredientes para " + receta.getNombreReceta(), disponibilidad);
                     });
                 }
 
@@ -102,51 +99,48 @@ public class MenuPrincipalController {
                 flowAlimentos.getChildren().add(tarjeta);
 
             } catch (IOException e) {
-                System.err.println("Error cargando tarjeta-receta.fxml: " + e.getMessage());
+                System.err.println("Error cargando tarjeta-receta en recetas: " + e.getMessage());
             }
         }
     }
 
+    /**
+     * Llena el panel con tarjetas de alimentos reutilizando el FXML
+     */
     private void actualizarVista(List<Alimento> lista, boolean esVistaCaducidad) {
         flowAlimentos.getChildren().clear();
 
         if (lista.isEmpty()) {
-            String msg = esVistaCaducidad ? "✅ No hay alimentos próximos a caducar." : "Tu despensa está vacía.";
+            String msg = esVistaCaducidad ? "✅ Todo al día." : "Despensa vacía.";
             flowAlimentos.getChildren().add(new Label(msg));
             return;
         }
 
         for (Alimento alimento : lista) {
             try {
-                // Reutilizamos la misma plantilla para alimentos
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/tarjeta-receta.fxml"));
                 VBox tarjeta = loader.load();
 
                 Label lbNombre = (Label) tarjeta.lookup("#lbNombre");
-                Label lbInfo = (Label) tarjeta.lookup("#lbTiempo"); // Usamos este para el tipo/calorías
-                Label lbFecha = (Label) tarjeta.lookup("#lbDesc");   // Usamos este para la fecha
-                Button btnCheck = (Button) tarjeta.lookup("#btnCheck"); // No lo necesitamos en alimentos
+                Label lbInfo = (Label) tarjeta.lookup("#lbTiempo");
+                Label lbFecha = (Label) tarjeta.lookup("#lbDesc");
+                Button btnCheck = (Button) tarjeta.lookup("#btnCheck");
                 Button btnEliminar = (Button) tarjeta.lookup("#btnEliminar");
 
-                // Configurar datos del alimento
                 if (lbNombre != null) lbNombre.setText(alimento.getNombre().toUpperCase());
                 if (lbInfo != null) lbInfo.setText(alimento.getTipo() + " | " + alimento.getCalorias() + " cal");
 
                 String fechaStr = (alimento.getFechaCaducidad() != null) ? alimento.getFechaCaducidad().toString() : "S/F";
-                if (lbFecha != null) lbFecha.setText("📅 " + fechaStr);
+                if (lbFecha != null) lbFecha.setText("📅 Caduca: " + fechaStr);
 
-                // Ocultamos el botón de ingredientes porque es un alimento suelto
+                // Configuramos visibilidad (La estética se queda en el FXML)
                 if (btnCheck != null) {
                     btnCheck.setVisible(false);
                     btnCheck.setManaged(false);
                 }
 
-                // Cambiamos el color del borde dinámicamente según si es caducidad o no
-                String colorBorde = esVistaCaducidad ? "#e67e22" : "#27ae60";
-                tarjeta.setStyle(tarjeta.getStyle() + "-fx-border-color: " + colorBorde + ";");
-
                 if (btnEliminar != null) {
-                    btnEliminar.setText("Eliminar Alimento");
+                    btnEliminar.setText("Eliminar");
                     btnEliminar.setOnAction(event -> {
                         alimentoDAO.eliminar(alimento.getId());
                         if (esVistaCaducidad) mostrarCaducidad(); else mostrarDespensa();
@@ -156,9 +150,20 @@ public class MenuPrincipalController {
                 flowAlimentos.getChildren().add(tarjeta);
 
             } catch (IOException e) {
-                System.err.println("Error cargando plantilla en alimentos: " + e.getMessage());
+                System.err.println("Error cargando tarjeta en alimentos: " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Método auxiliar para alertas
+     */
+    private void mostrarAlerta(String cabecera, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("EcoChef");
+        alert.setHeaderText(cabecera);
+        alert.setContentText(contenido);
+        alert.showAndWait();
     }
 
     @FXML
