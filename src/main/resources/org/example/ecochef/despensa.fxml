@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER" spacing="15.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.ecochef.controller.DespensaController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Mi Despensa" />
+
+    <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="20.0">
+        <VBox.margin>
+            <Insets right="20.0" />
+        </VBox.margin>
+      <opaqueInsets>
+         <Insets />
+      </opaqueInsets>
+      <padding>
+         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+      </padding>
+      <children>
+         <Button mnemonicParsing="false" onAction="#abrirFormularioAñadir" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Añadir alimento" />
+      </children>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+        <content>
+            <FlowPane fx:id="flowAlimentos" hgap="10.0" vgap="10.0" />
+        </content>
+    </ScrollPane>
+</VBox>
