@@ -11,16 +11,16 @@
     </padding>
 
     <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Libro de Recetas" />
-   <Label text="Recetas sugeridas" textFill="#7f8c8d">
-      <font>
-         <Font size="14.0" />
-      </font>
-   </Label>
+
+    <Label text="Recetas sugeridas" textFill="#7f8c8d">
+        <font>
+            <Font size="14.0" />
+        </font>
+    </Label>
 
     <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
         <content>
-            <FlowPane fx:id="flowRecetasContenedor" hgap="10.0" vgap="10.0" />
+            <FlowPane fx:id="flowRecetasContenedor" hgap="15.0" vgap="15.0" />
         </content>
     </ScrollPane>
-   <FlowPane fx:id="flowRecetas" hgap="15.0" prefHeight="200.0" prefWidth="200.0" vgap="15.0" />
 </VBox>

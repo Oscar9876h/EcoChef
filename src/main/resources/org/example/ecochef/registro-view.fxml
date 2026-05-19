@@ -6,6 +6,7 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
 <VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.ecochef.controller.RegistroController">
@@ -33,7 +34,23 @@
     <TextField fx:id="txtEmail" promptText="Correo electrónico" />
     <PasswordField fx:id="txtPassword" promptText="Contraseña" />
 
-    <Button fx:id="btnRegistrar" onAction="#handleRegistro" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Registrarme" />
+    <Button fx:id="btnRegistrar" onAction="#handleRegistro" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Registrarme">
+      <textFill>
+         <RadialGradient centerX="0.5" centerY="0.5" radius="0.5">
+            <stops>
+               <Stop>
+                  <color>
+                     <Color />
+                  </color>
+               </Stop>
+               <Stop offset="1.0">
+                  <color>
+                     <Color red="1.0" green="1.0" blue="1.0" />
+                  </color>
+               </Stop>
+            </stops>
+         </RadialGradient>
+      </textFill></Button>
     <Hyperlink fx:id="irALogin" onAction="#irALogin" text="¿Ya tienes cuenta? Inicia sesión" />
    <cursor>
       <Cursor fx:constant="S_RESIZE" />

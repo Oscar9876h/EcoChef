@@ -9,16 +9,17 @@
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #c0392b;" text="Control de Caducidad" />
-   <Label text="Alimentos próximos a vencer" textAlignment="JUSTIFY" textFill="#7f8c8d">
-      <VBox.margin>
-         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-      </VBox.margin>
-   </Label>
-   <ScrollPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-background: white;">
-     <content>
-       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-     </content>
-   </ScrollPane>
-   <FlowPane prefHeight="200.0" prefWidth="200.0" />
+    <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Control de Caducidad" />
+
+    <Label text="Alimentos próximos a vencer" textAlignment="JUSTIFY" textFill="#7f8c8d">
+        <VBox.margin>
+            <Insets bottom="10.0" />
+        </VBox.margin>
+    </Label>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: white;" VBox.vgrow="ALWAYS">
+        <content>
+            <FlowPane fx:id="flowCaducidades" hgap="10.0" vgap="10.0" />
+        </content>
+    </ScrollPane>
 </VBox>

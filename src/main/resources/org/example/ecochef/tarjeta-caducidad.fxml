@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: #f8d7da; -fx-background-radius: 8px; -fx-border-color: #f5c6cb; -fx-border-radius: 8px; -fx-padding: 10px;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <Label fx:id="lblTextoCaducidad" style="-fx-text-fill: #721c24; -fx-font-weight: bold; -fx-font-size: 14px;" text="Alimento de muestra - Caduca en X días" />
+    </children>
+</HBox>

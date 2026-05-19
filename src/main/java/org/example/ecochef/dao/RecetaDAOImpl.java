@@ -101,23 +101,18 @@ public class RecetaDAOImpl implements Dao<Receta> {
 
     /**
      * Comprueba disponibilidad buscando el nombre del ingrediente en la tabla 'alimentos'.
+     * Compara los textos ignorando mayúsculas, minúsculas y espacios extras.
      */
     public String comprobarDisponibilidad(int idReceta) {
         StringBuilder resultado = new StringBuilder();
 
-        // SQL CORREGIDO:
-        // ri -> tabla intermedia de ingredientes de la receta
-        // ib -> tabla con los nombres base (Pasta, Huevo, etc.)
-        // a -> tu despensa personal (donde añades alimentos desde la App)
+        // SQL MEJORADO: Forzamos a comparar ambos nombres en MAYÚSCULAS con UPPER()
         String sql = "SELECT ib.nombre AS ingrediente, " +
-                "CASE WHEN (SELECT COUNT(*) FROM alimentos a WHERE a.nombre = ib.nombre) > 0 " +
+                "CASE WHEN (SELECT COUNT(*) FROM alimentos a WHERE UPPER(TRIM(a.nombre)) = UPPER(TRIM(ib.nombre))) > 0 " +
                 "THEN '✅' ELSE '❌' END AS estado " +
-                "FROM recetas_ingredientes ri " + // Cambiado a 'recetas_ingredients' si así está en tu DB
+                "FROM recetas_ingredientes ri " +
                 "JOIN ingredientes_base ib ON ri.id_alimento = ib.id_ingrediente_base " +
                 "WHERE ri.id_receta = ?";
-
-        // Nota: He usado 'recetas_ingredients' arriba basándome en tus capturas de Workbench anteriores.
-        // Si en tu DB se llama 'recetas_ingredientes' (en español), cámbialo en la línea del SQL.
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
