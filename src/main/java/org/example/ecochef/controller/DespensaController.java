@@ -8,6 +8,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import org.example.ecochef.dao.AlimentoDAOImpl;
 import org.example.ecochef.model.Alimento;
 
@@ -15,12 +18,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class DespensaController implements Initializable {
 
-    @FXML private FlowPane flowAlimentos;
+    // Cambiado de FlowPane a VBox para poder apilar los títulos y las secciones hacia abajo
+    @FXML private VBox flowAlimentos;
 
     private final AlimentoDAOImpl alimentoDAO = new AlimentoDAOImpl();
 
@@ -36,48 +42,85 @@ public class DespensaController implements Initializable {
 
     private void actualizarVista(List<Alimento> lista) {
         flowAlimentos.getChildren().clear();
+        flowAlimentos.setSpacing(15); // Espacio vertical entre los bloques de secciones
+        flowAlimentos.setPadding(new Insets(15));
 
         if (lista.isEmpty()) {
             flowAlimentos.getChildren().add(new Label("Despensa vacía."));
             return;
         }
 
-        for (Alimento alimento : lista) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/tarjeta-receta.fxml"));
-                VBox tarjeta = loader.load();
+        // 1. AGRUPAR LOS ALIMENTOS POR SU TIPO (Sección) EN UN MAPA AUTOMÁTICO
+        Map<String, List<Alimento>> alimentosPorSeccion = lista.stream()
+                .collect(Collectors.groupingBy(alimento ->
+                        alimento.getTipo() != null ? alimento.getTipo().toUpperCase() : "OTROS"
+                ));
 
-                Label lbNombre = (Label) tarjeta.lookup("#lbNombre");
-                Label lbInfo = (Label) tarjeta.lookup("#lbTiempo");
-                Label lbFecha = (Label) tarjeta.lookup("#lbDesc");
-                Button btnCheck = (Button) tarjeta.lookup("#btnCheck");
-                Button btnEliminar = (Button) tarjeta.lookup("#btnEliminar");
+        // 2. RECORRER CADA SECCIÓN GENERADA
+        alimentosPorSeccion.forEach((seccion, listaAlimentos) -> {
 
-                if (lbNombre != null) lbNombre.setText(alimento.getNombre().toUpperCase());
-                if (lbInfo != null) lbInfo.setText(alimento.getTipo() + " | " + alimento.getCalorias() + " cal");
+            // --- CREAR EL TÍTULO DE LA SECCIÓN (Ej: • FRUTAS (3)) ---
+            Label txtSeccion = new Label("• " + seccion + " (" + listaAlimentos.size() + ")");
+            txtSeccion.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+            txtSeccion.setTextFill(Color.web("#2E7D32")); // Color verde oscuro elegante
+            VBox.setMargin(txtSeccion, new Insets(10, 0, 5, 0));
+            flowAlimentos.getChildren().add(txtSeccion);
 
-                String fechaStr = (alimento.getFechaCaducidad() != null) ? alimento.getFechaCaducidad().toString() : "S/F";
-                if (lbFecha != null) lbFecha.setText("📅 Caduca: " + fechaStr);
+            // --- CREAR EL CONTENEDOR HORIZONTAL PARA LAS TARJETAS DE ESTA SECCIÓN ---
+            FlowPane flowSeccion = new FlowPane();
+            flowSeccion.setHgap(15); // Espacio horizontal entre tarjetas
+            flowSeccion.setVgap(15); // Espacio vertical por si cambian de fila
 
-                if (btnCheck != null) {
-                    btnCheck.setVisible(false);
-                    btnCheck.setManaged(false);
+            // 3. GENERAR LAS TARJETAS EXCLUSIVAS DE ESTA SECCIÓN
+            for (Alimento alimento : listaAlimentos) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/tarjeta-receta.fxml"));
+                    VBox tarjeta = loader.load();
+
+                    Label lbNombre = (Label) tarjeta.lookup("#lbNombre");
+                    Label lbInfo = (Label) tarjeta.lookup("#lbTiempo");
+                    Label lbFecha = (Label) tarjeta.lookup("#lbDesc");
+                    Button btnCheck = (Button) tarjeta.lookup("#btnCheck");
+                    Button btnEliminar = (Button) tarjeta.lookup("#btnEliminar");
+
+                    if (lbNombre != null) lbNombre.setText(alimento.getNombre().toUpperCase());
+                    if (lbInfo != null) lbInfo.setText(alimento.getTipo() + " | " + alimento.getCalorias() + " cal");
+
+                    String fechaStr = (alimento.getFechaCaducidad() != null) ? alimento.getFechaCaducidad().toString() : "S/F";
+                    if (lbFecha != null) lbFecha.setText("📅 Caduca: " + fechaStr);
+
+                    // --- CONTROL DE CADUCIDAD (Pinta la alerta si ya ha pasado la fecha actual) ---
+                    if (alimento.getFechaCaducidad() != null && alimento.getFechaCaducidad().isBefore(LocalDate.now())) {
+                        if (lbFecha != null) {
+                            lbFecha.setText("📅 Caduca: " + fechaStr + " [CADUCADO]");
+                            lbFecha.setTextFill(Color.RED); // Texto en rojo para destacar
+                        }
+                    }
+
+                    if (btnCheck != null) {
+                        btnCheck.setVisible(false);
+                        btnCheck.setManaged(false);
+                    }
+
+                    if (btnEliminar != null) {
+                        btnEliminar.setText("Eliminar");
+                        btnEliminar.setOnAction(event -> {
+                            alimentoDAO.eliminar(alimento.getId());
+                            cargarDespensa();
+                        });
+                    }
+
+                    // Se añade la tarjeta al contenedor de SU propia sección
+                    flowSeccion.getChildren().add(tarjeta);
+
+                } catch (IOException e) {
+                    System.err.println("Error cargando tarjeta en DespensaController: " + e.getMessage());
                 }
-
-                if (btnEliminar != null) {
-                    btnEliminar.setText("Eliminar");
-                    btnEliminar.setOnAction(event -> {
-                        alimentoDAO.eliminar(alimento.getId());
-                        cargarDespensa();
-                    });
-                }
-
-                flowAlimentos.getChildren().add(tarjeta);
-
-            } catch (IOException e) {
-                System.err.println("Error cargando tarjeta en DespensaController: " + e.getMessage());
             }
-        }
+
+            // Añadimos el bloque de tarjetas debajo de su título correspondiente
+            flowAlimentos.getChildren().add(flowSeccion);
+        });
     }
 
     @FXML
@@ -113,7 +156,16 @@ public class DespensaController implements Initializable {
                 a.setTipo(comboTipo.getValue());
                 try { a.setCalorias(Integer.parseInt(txtCalorias.getText())); } catch (Exception e) { a.setCalorias(0); }
                 a.setFechaCaducidad(pickerFecha.getValue());
-                a.setIdCategoriaAlimento(1);
+
+                // Mapeo dinámico básico para guardar el ID numérico de categoría en la BD
+                int idCat = 5; // Por defecto Otros/Despensa
+                String tipo = comboTipo.getValue().toLowerCase();
+                if (tipo.contains("fruta")) idCat = 1;
+                else if (tipo.contains("verdura")) idCat = 2;
+                else if (tipo.contains("carne") || tipo.contains("pescado")) idCat = 3;
+                else if (tipo.contains("lácteo")) idCat = 4;
+
+                a.setIdCategoriaAlimento(idCat);
                 return a;
             }
             return null;

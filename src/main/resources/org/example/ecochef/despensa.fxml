@@ -15,20 +15,20 @@
         <VBox.margin>
             <Insets right="20.0" />
         </VBox.margin>
-      <opaqueInsets>
-         <Insets />
-      </opaqueInsets>
-      <padding>
-         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-      </padding>
-      <children>
-         <Button mnemonicParsing="false" onAction="#abrirFormularioAñadir" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Añadir alimento" />
-      </children>
+        <opaqueInsets>
+            <Insets />
+        </opaqueInsets>
+        <padding>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+        </padding>
+        <children>
+            <Button mnemonicParsing="false" onAction="#abrirFormularioAñadir" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Añadir alimento" />
+        </children>
     </HBox>
 
     <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
         <content>
-            <FlowPane fx:id="flowAlimentos" hgap="10.0" vgap="10.0" />
+            <VBox fx:id="flowAlimentos" spacing="15.0" style="-fx-background-color: transparent;" />
         </content>
     </ScrollPane>
 </VBox>
