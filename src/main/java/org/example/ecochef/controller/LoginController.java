@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.ecochef.dao.UsuarioDAOImpl;
 import org.example.ecochef.model.Usuario;
+import org.example.ecochef.model.SesionActiva; // 🌟 IMPORTANTE: Importamos la sesión activa
 
 import java.io.IOException;
 
@@ -14,16 +15,14 @@ public class LoginController {
 
     @FXML private TextField txtEmail;
     @FXML private PasswordField txtPassword;
-    @FXML private Button btnLogin; // RECUERDA: Ponle este fx:id al botón en SceneBuilder
+    @FXML private Button btnLogin;
 
     private UsuarioDAOImpl usuarioDAO = new UsuarioDAOImpl();
 
     @FXML
     public void initialize() {
-        // El botón empieza desactivado hasta que Pepe escriba algo
         btnLogin.setDisable(true);
 
-        // Escuchamos los cambios en el texto (Expresiones Lambda)
         txtEmail.textProperty().addListener((obs, old, newValue) -> validarBoton());
         txtPassword.textProperty().addListener((obs, old, newValue) -> validarBoton());
     }
@@ -39,12 +38,25 @@ public class LoginController {
         String email = txtEmail.getText();
         String pass = txtPassword.getText();
 
-        // 1. Buscamos a Pepe en la DB
+        // 1. Buscamos al usuario en la DB (Tu DAO ya devuelve el objeto con su rol de MySQL)
         Usuario usuarioLogueado = usuarioDAO.login(email, pass);
 
         if (usuarioLogueado != null) {
             System.out.println("✅ Login correcto: Bienvenido " + usuarioLogueado.getNombre());
-            // 2. Si Pepe existe, entramos al menú
+
+            // Guardamos el nombre en la sesión activa
+            SesionActiva.nombreUsuarioLogueado = usuarioLogueado.getNombre();
+
+
+            if (usuarioLogueado.getRol() != null) {
+                SesionActiva.rolUsuarioLogueado = usuarioLogueado.getRol().toLowerCase().trim();
+            } else {
+                SesionActiva.rolUsuarioLogueado = "usuario"; // Por seguridad, si viene nulo
+            }
+
+            System.out.println("ℹ️ Rol asignado en sesión: " + SesionActiva.rolUsuarioLogueado);
+
+            // 2. Entramos al menú principal con el rol ya cargado en memoria
             irAMenuPrincipal();
         } else {
             // 3. Si se equivoca, le avisamos
@@ -54,7 +66,7 @@ public class LoginController {
 
     private void irAMenuPrincipal() {
         try {
-            // Cargamos la pantalla principal (ajusta el nombre si no es hello-view.fxml)
+            // Cargamos la pantalla principal
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/hello-view.fxml"));
             Scene scene = new Scene(loader.load());
             Stage stage = (Stage) txtEmail.getScene().getWindow();
