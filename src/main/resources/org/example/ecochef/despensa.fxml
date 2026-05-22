@@ -22,7 +22,7 @@
             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
         </padding>
         <children>
-            <Button mnemonicParsing="false" onAction="#abrirFormularioAñadir" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Añadir alimento" />
+            <Button fx:id="btnAnadirAlimento" mnemonicParsing="false" onAction="#abrirFormularioAnadir" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Añadir alimento" />
         </children>
     </HBox>
 

@@ -35,7 +35,6 @@ public class Receta extends EntidadBase {
         this.usuario = usuario;
     }
 
-    // ⭐ --- IMPLEMENTACIÓN DEL MÉTODO ABSTRACTO (Esto elimina el error de compilación) ---
     @Override
     public String getTipoEntidad() {
         return "Receta de Cocina";

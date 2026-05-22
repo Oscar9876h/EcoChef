@@ -31,7 +31,7 @@ public class Usuario extends EntidadBase {
     }
 
     /**
-     * ⭐ IMPLEMENTACIÓN OBLIGATORIA DEL MÉTODO ABSTRACTO DE ENTIDADBASE
+     * IMPLEMENTACIÓN OBLIGATORIA DEL MÉTODO ABSTRACTO DE ENTIDADBASE
      * Esto es lo que soluciona el error y hace feliz a IntelliJ.
      */
     @Override
@@ -40,7 +40,7 @@ public class Usuario extends EntidadBase {
     }
 
     // --- GETTERS Y SETTERS ---
-    // Nota: getId() y setId() no se escriben aquí, ¡se heredan automáticamente!
+
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }

@@ -7,16 +7,16 @@ package org.example.ecochef.model;
 public abstract class EntidadBase {
     protected int id;
 
-    // Constructor vacío (necesario para JavaFX y DAOs)
+    // Constructor vacío ,necesario para JavaFX y DAOs.
     public EntidadBase() {
     }
 
-    // NUEVO: Constructor con parámetros que invoca la hija
+    // Constructor con parámetros que invoca la hija
     public EntidadBase(int id) {
         this.id = id;
     }
 
-    // ⭐ REQUISITO EXTRA: Método abstracto que obliga a las clases hijas a identificarse
+    // Método abstracto que obliga a las clases hijas a identificarse
     public abstract String getTipoEntidad();
 
     public int getId() { return id; }

@@ -8,71 +8,79 @@ import javafx.stage.Stage;
 import org.example.ecochef.dao.UsuarioDAOImpl;
 import org.example.ecochef.model.Usuario;
 import org.example.ecochef.model.SesionActiva;
-import org.example.ecochef.util.ValidacionUtils; // 🌟 NUEVO: Importamos tu nueva clase de utilidades
+import org.example.ecochef.util.ValidacionUtils;
 
 import java.io.IOException;
 
+/**
+ * Controlador de la vista de Login.
+ * Gestiona la autenticación de usuarios, la validación de formatos y
+ * la inicialización de la sesión activa al acceder al sistema.
+ */
 public class LoginController {
 
     @FXML private TextField txtEmail;
     @FXML private PasswordField txtPassword;
     @FXML private Button btnLogin;
 
-    private UsuarioDAOImpl usuarioDAO = new UsuarioDAOImpl();
+    private final UsuarioDAOImpl usuarioDAO = new UsuarioDAOImpl();
 
+    /**
+     * Configura los listeners para habilitar el botón de login solo
+     * cuando los campos obligatorios contienen texto.
+     */
     @FXML
     public void initialize() {
         btnLogin.setDisable(true);
-
         txtEmail.textProperty().addListener((obs, old, newValue) -> validarBoton());
         txtPassword.textProperty().addListener((obs, old, newValue) -> validarBoton());
     }
 
+    /**
+     * Determina el estado del botón de inicio de sesión según el contenido de los campos.
+     */
     private void validarBoton() {
         boolean camposVacios = txtEmail.getText().trim().isEmpty() ||
                 txtPassword.getText().trim().isEmpty();
         btnLogin.setDisable(camposVacios);
     }
 
+    /**
+     * Procesa la autenticación llamando al DAO.
+     * Utiliza la clase ValidacionUtils para asegurar la integridad de los datos antes de consultar la BBDD.
+     */
     @FXML
     private void handleLogin() {
-        String email = txtEmail.getText().trim(); // El trim() elimina espacios accidentales
+        String email = txtEmail.getText().trim();
         String pass = txtPassword.getText();
 
-        // 🌟 REQUISITO NUEVO: Validar formato del email antes de mirar la base de datos
+        // Validamos el formato del email antes de consultar la persistencia
         if (!ValidacionUtils.emailValido(email)) {
             mostrarAlerta("Formato no válido", "El email debe ser válido (ejemplo@dominio.com).");
-            return; // Detiene la ejecución por completo
+            return;
         }
 
-        // 1. Buscamos al usuario en la DB (Tu DAO ya devuelve el objeto con su rol de MySQL)
+        // Ejecución de login mediante el DAO
         Usuario usuarioLogueado = usuarioDAO.login(email, pass);
 
         if (usuarioLogueado != null) {
-            System.out.println("✅ Login correcto: Bienvenido " + usuarioLogueado.getNombre());
-
-            // Guardamos el nombre en la sesión activa
+            // Gestión de sesión: se almacenan los datos del usuario en la clase estática de sesión
             SesionActiva.nombreUsuarioLogueado = usuarioLogueado.getNombre();
+            SesionActiva.rolUsuarioLogueado = (usuarioLogueado.getRol() != null)
+                    ? usuarioLogueado.getRol().toLowerCase().trim()
+                    : "usuario";
 
-            if (usuarioLogueado.getRol() != null) {
-                SesionActiva.rolUsuarioLogueado = usuarioLogueado.getRol().toLowerCase().trim();
-            } else {
-                SesionActiva.rolUsuarioLogueado = "usuario"; // Por seguridad, si viene nulo
-            }
-
-            System.out.println("ℹ️ Rol asignado en sesión: " + SesionActiva.rolUsuarioLogueado);
-
-            // 2. Entramos al menú principal con el rol ya cargado en memoria
             irAMenuPrincipal();
         } else {
-            // 3. Si se equivoca, le avisamos
             mostrarAlerta("Error de acceso", "Email o contraseña incorrectos.");
         }
     }
 
+    /**
+     * Realiza el cambio de escena hacia la ventana principal (HelloView).
+     */
     private void irAMenuPrincipal() {
         try {
-            // Cargamos la pantalla principal
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/hello-view.fxml"));
             Scene scene = new Scene(loader.load());
             Stage stage = (Stage) txtEmail.getScene().getWindow();
@@ -83,6 +91,11 @@ public class LoginController {
         }
     }
 
+    /**
+     * Muestra alertas de error al usuario mediante componentes del sistema.
+     * @param titulo Título de la ventana de alerta.
+     * @param mensaje Descripción del error.
+     */
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titulo);

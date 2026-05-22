@@ -39,8 +39,8 @@ public class XMLManager {
     }
 
     /**
-     * NUEVO MÉTODO: Lee archivos que están dentro de la carpeta resources.
-     * Úsalo para cargar el db_config.xml.
+     * Lee archivos que están dentro de la carpeta resources.
+     * Usado para cargar el db_config.xml.
      */
     public static <T> T readXMLFromResources(Class<T> clazz, String resourcePath) {
         T result = null;

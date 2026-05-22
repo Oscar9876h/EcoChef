@@ -12,27 +12,34 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/**
+ * Controlador encargado de la gestión y visualización de alertas de caducidad.
+ * Filtra y muestra los alimentos cuyo vencimiento es inminente (≤ 5 días).
+ */
 public class CaducidadController {
 
     @FXML
     private FlowPane flowCaducidades;
 
-    // Usamos exactamente el mismo DAO que funciona en tu Despensa
     private final AlimentoDAOImpl alimentoDAO = new AlimentoDAOImpl();
 
+    /**
+     * Inicializa el controlador cargando los datos al iniciar la vista.
+     */
     @FXML
     public void initialize() {
         cargarAlimentosProximosACaducar();
     }
 
+    /**
+     * Lógica principal: obtiene todos los alimentos, calcula los días restantes
+     * y genera dinámicamente tarjetas visuales para aquellos que caducan en menos de 5 días.
+     */
     private void cargarAlimentosProximosACaducar() {
         flowCaducidades.getChildren().clear();
-
-        // Traemos todos los alimentos tal y como hace la Despensa
         List<Alimento> listaAlimentos = alimentoDAO.listarTodos();
 
         if (listaAlimentos == null || listaAlimentos.isEmpty()) {
-            System.out.println("⚠️ Alerta: No hay ningún alimento en la despensa.");
             return;
         }
 
@@ -41,30 +48,26 @@ public class CaducidadController {
         for (Alimento alimento : listaAlimentos) {
             if (alimento != null && alimento.getFechaCaducidad() != null) {
 
-                // Calculamos los días restantes usando la fecha del alimento
+                // Cálculo de días usando ChronoUnit para obtener la diferencia real
                 long diasRestantes = ChronoUnit.DAYS.between(hoy, alimento.getFechaCaducidad());
 
-                // REGLA: Si quedan 5 días o menos (o ya caducó), se muestra en la pantalla de alertas
                 if (diasRestantes <= 5) {
                     try {
-                        // 1. Cargamos el diseño FXML de la tarjeta
+                        // Carga dinámica de la vista (tarjeta) mediante FXML
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/tarjeta-caducidad.fxml"));
                         HBox tarjeta = loader.load();
 
-                        // 2. Buscamos el Label por su ID dentro del FXML
                         Label lblTexto = (Label) tarjeta.lookup("#lblTextoCaducidad");
 
-                        // 3. Le asignamos los datos reales del alimento (¡con su nombre real!)
                         if (lblTexto != null) {
                             String mensaje = alimento.getNombre().toUpperCase() + " - Caduca en " + diasRestantes + " días";
                             lblTexto.setText(mensaje);
                         }
 
-                        // 4. Añadimos la tarjeta al panel visual
                         flowCaducidades.getChildren().add(tarjeta);
 
                     } catch (IOException e) {
-                        System.err.println("Error al cargar el FXML de la tarjeta: " + e.getMessage());
+                        System.err.println("Error al cargar la tarjeta: " + e.getMessage());
                     }
                 }
             }

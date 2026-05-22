@@ -7,8 +7,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase de acceso a datos para la entidad Receta.
+ * Gestiona operaciones de persistencia y lógica de consultas complejas
+ * relacionadas con la disponibilidad de ingredientes en la despensa.
+ */
 public class RecetaDAOImpl implements Dao<Receta> {
 
+    /**
+     * Registra una nueva receta en la base de datos.
+     */
     @Override
     public void guardar(Receta receta) {
         String sql = "INSERT INTO recetas (nombre, descripcion, tiempo_preparacion, id_usuario) VALUES (?, ?, ?, ?)";
@@ -17,6 +25,7 @@ public class RecetaDAOImpl implements Dao<Receta> {
             pstmt.setString(1, receta.getNombreReceta());
             pstmt.setString(2, receta.getDescripcion());
             pstmt.setInt(3, receta.getTiempoPreparacion());
+            // Asigna el ID del autor o un valor por defecto (1) si no existe usuario
             pstmt.setInt(4, (receta.getUsuario() != null) ? receta.getUsuario().getId() : 1);
             pstmt.executeUpdate();
             System.out.println("✅ Receta '" + receta.getNombreReceta() + "' guardada correctamente.");
@@ -25,6 +34,9 @@ public class RecetaDAOImpl implements Dao<Receta> {
         }
     }
 
+    /**
+     * Actualiza los datos descriptivos de una receta existente.
+     */
     @Override
     public void actualizar(Receta receta) {
         String sql = "UPDATE recetas SET nombre = ?, descripcion = ?, tiempo_preparacion = ? WHERE id_receta = ?";
@@ -41,6 +53,9 @@ public class RecetaDAOImpl implements Dao<Receta> {
         }
     }
 
+    /**
+     * Elimina una receta del sistema mediante su ID.
+     */
     @Override
     public void eliminar(int id) {
         String sql = "DELETE FROM recetas WHERE id_receta = ?";
@@ -54,6 +69,9 @@ public class RecetaDAOImpl implements Dao<Receta> {
         }
     }
 
+    /**
+     * Obtiene una lista completa de todas las recetas registradas.
+     */
     @Override
     public List<Receta> listarTodos() {
         List<Receta> lista = new ArrayList<>();
@@ -67,6 +85,7 @@ public class RecetaDAOImpl implements Dao<Receta> {
                 r.setNombreReceta(rs.getString("nombre"));
                 r.setDescripcion(rs.getString("descripcion"));
                 r.setTiempoPreparacion(rs.getInt("tiempo_preparacion"));
+
                 Usuario autor = new Usuario();
                 autor.setId(rs.getInt("id_usuario"));
                 r.setUsuario(autor);
@@ -78,6 +97,9 @@ public class RecetaDAOImpl implements Dao<Receta> {
         return lista;
     }
 
+    /**
+     * Busca una receta específica por su ID.
+     */
     @Override
     public Receta buscarPorId(int id) {
         String sql = "SELECT * FROM recetas WHERE id_receta = ?";
@@ -100,13 +122,15 @@ public class RecetaDAOImpl implements Dao<Receta> {
     }
 
     /**
-     * Comprueba disponibilidad buscando el nombre del ingrediente en la tabla 'alimentos'.
-     * Compara los textos ignorando mayúsculas, minúsculas y espacios extras.
+     * Consulta compleja que verifica si los ingredientes de una receta están presentes
+     * en la despensa del usuario, normalizando nombres con UPPER y TRIM.
+     * @param idReceta ID de la receta a comprobar.
+     * @return String con el reporte de disponibilidad (✅/❌).
      */
     public String comprobarDisponibilidad(int idReceta) {
         StringBuilder resultado = new StringBuilder();
 
-        // SQL MEJORADO: Forzamos a comparar ambos nombres en MAYÚSCULAS con UPPER()
+        // Consulta SQL utilizando JOIN para relacionar ingredientes y subquery para comparar existencia
         String sql = "SELECT ib.nombre AS ingrediente, " +
                 "CASE WHEN (SELECT COUNT(*) FROM alimentos a WHERE UPPER(TRIM(a.nombre)) = UPPER(TRIM(ib.nombre))) > 0 " +
                 "THEN '✅' ELSE '❌' END AS estado " +
@@ -142,16 +166,16 @@ public class RecetaDAOImpl implements Dao<Receta> {
     }
 
     /**
-     * Filtra las recetas por nombre utilizando la API de Streams y Lambdas.
-     * REQUISITO: Cumple con el uso avanzado de colecciones y expresiones lambda.
+     * Filtra una lista de recetas basándose en un criterio de búsqueda textual,
+     * utilizando la API de Streams para un filtrado eficiente y legible.
      */
-    public java.util.List<Receta> filtrarRecetasPorNombre(java.util.List<Receta> listaCompleta, String textoBusqueda) {
+    public List<Receta> filtrarRecetasPorNombre(List<Receta> listaCompleta, String textoBusqueda) {
         if (listaCompleta == null || textoBusqueda == null || textoBusqueda.trim().isEmpty()) {
             return listaCompleta;
         }
 
-        return listaCompleta.stream() // 1. Convertimos la lista en un Stream
-                .filter(r -> r.getNombreReceta().toLowerCase().contains(textoBusqueda.toLowerCase().trim())) // 2. Expresión Lambda para filtrar
-                .collect(java.util.stream.Collectors.toList()); // 3. Recolectamos el resultado en una nueva lista
+        return listaCompleta.stream()
+                .filter(r -> r.getNombreReceta().toLowerCase().contains(textoBusqueda.toLowerCase().trim()))
+                .collect(java.util.stream.Collectors.toList());
     }
 }

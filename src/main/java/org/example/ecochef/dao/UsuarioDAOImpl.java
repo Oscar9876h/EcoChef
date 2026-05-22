@@ -6,11 +6,18 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase de acceso a datos para la entidad Usuario.
+ * Gestiona el registro de nuevos usuarios y el proceso de autenticación (login).
+ */
 public class UsuarioDAOImpl implements Dao<Usuario> {
 
+    /**
+     * Registra un nuevo usuario en la base de datos.
+     * @param usuario Objeto con los datos del nuevo perfil a crear.
+     */
     @Override
     public void guardar(Usuario usuario) {
-        // Mantenemos "contraseña" con ñ porque así está en tu DB
         String sql = "INSERT INTO usuarios (nombre, email, contraseña, rol) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -30,7 +37,10 @@ public class UsuarioDAOImpl implements Dao<Usuario> {
     }
 
     /**
-     * MÉTODO LOGIN: Validado con tus nombres de columna reales
+     * Valida las credenciales de un usuario.
+     * @param email El correo electrónico proporcionado.
+     * @param password La contraseña proporcionada.
+     * @return El objeto Usuario si las credenciales son correctas, o null si fallan.
      */
     public Usuario login(String email, String password) {
         String sql = "SELECT * FROM usuarios WHERE email = ? AND contraseña = ?";
@@ -45,9 +55,8 @@ public class UsuarioDAOImpl implements Dao<Usuario> {
             if (rs.next()) {
                 Usuario user = new Usuario();
 
-                // CORRECCIÓN AQUÍ: Usamos "idusuarios" como sale en tu foto de Workbench
+                // Mapeo de campos desde la base de datos al modelo
                 user.setId(rs.getInt("idusuarios"));
-
                 user.setNombre(rs.getString("nombre"));
                 user.setEmail(rs.getString("email"));
                 user.setRol(rs.getString("rol"));
@@ -59,6 +68,7 @@ public class UsuarioDAOImpl implements Dao<Usuario> {
         return null;
     }
 
+    // Métodos pendientes de implementación para futuras funcionalidades de gestión de usuarios
     @Override public void actualizar(Usuario usuario) {}
     @Override public void eliminar(int id) {}
     @Override public Usuario buscarPorId(int id) { return null; }
