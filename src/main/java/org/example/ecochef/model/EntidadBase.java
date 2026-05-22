@@ -16,6 +16,9 @@ public abstract class EntidadBase {
         this.id = id;
     }
 
+    // ⭐ REQUISITO EXTRA: Método abstracto que obliga a las clases hijas a identificarse
+    public abstract String getTipoEntidad();
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 }

@@ -46,4 +46,9 @@ public class CategoriaAlimento extends EntidadBase {
     public String toString() {
         return "CategoriaAlimento{id=" + id + ", nombre='" + nombreCategoria + "'}";
     }
+
+    @Override
+    public String getTipoEntidad() {
+        return "CATEGORIA_ALIMENTO";
+    }
 }

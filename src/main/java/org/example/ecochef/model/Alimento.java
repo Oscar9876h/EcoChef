@@ -11,7 +11,7 @@ public class Alimento extends EntidadBase {
     private String tipo;
     private int calorias;
     private int idCategoriaAlimento;
-    private LocalDate fechaCaducidad; // <-- Nuevo atributo
+    private LocalDate fechaCaducidad;
 
     /**
      * Constructor vacío (Sobrecarga 1)
@@ -24,15 +24,21 @@ public class Alimento extends EntidadBase {
      * Constructor completo (Sobrecarga 2)
      */
     public Alimento(int id, String nombre, String tipo, int calorias, int idCategoriaAlimento, LocalDate fechaCaducidad) {
-        this.id = id;
+        super(id); // 🧠 ¡CAMBIO AQUÍ! Invocamos al padre de forma óptima con super() en vez de usar this.id
         this.nombre = nombre;
         this.tipo = tipo;
         this.calorias = calorias;
         this.idCategoriaAlimento = idCategoriaAlimento;
-        this.fechaCaducidad = fechaCaducidad; // <-- Inicialización
+        this.fechaCaducidad = fechaCaducidad;
     }
 
-    // Getters y Setters existentes
+    // ⭐ --- IMPLEMENTACIÓN DEL MÉTODO ABSTRACTO (Esto elimina el error de compilación) ---
+    @Override
+    public String getTipoEntidad() {
+        return "Alimento de la despensa";
+    }
+
+    // --- GETTERS Y SETTERS EXISTENTES ---
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
@@ -45,7 +51,7 @@ public class Alimento extends EntidadBase {
     public int getIdCategoriaAlimento() { return idCategoriaAlimento; }
     public void setIdCategoriaAlimento(int idCategoriaAlimento) { this.idCategoriaAlimento = idCategoriaAlimento; }
 
-    // --- NUEVOS MÉTODOS PARA LA FECHA ---
+    // --- MÉTODOS PARA LA FECHA ---
     public LocalDate getFechaCaducidad() { return fechaCaducidad; }
     public void setFechaCaducidad(LocalDate fechaCaducidad) { this.fechaCaducidad = fechaCaducidad; }
 

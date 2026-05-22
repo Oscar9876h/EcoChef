@@ -140,4 +140,18 @@ public class RecetaDAOImpl implements Dao<Receta> {
 
         return resultado.toString();
     }
+
+    /**
+     * Filtra las recetas por nombre utilizando la API de Streams y Lambdas.
+     * REQUISITO: Cumple con el uso avanzado de colecciones y expresiones lambda.
+     */
+    public java.util.List<Receta> filtrarRecetasPorNombre(java.util.List<Receta> listaCompleta, String textoBusqueda) {
+        if (listaCompleta == null || textoBusqueda == null || textoBusqueda.trim().isEmpty()) {
+            return listaCompleta;
+        }
+
+        return listaCompleta.stream() // 1. Convertimos la lista en un Stream
+                .filter(r -> r.getNombreReceta().toLowerCase().contains(textoBusqueda.toLowerCase().trim())) // 2. Expresión Lambda para filtrar
+                .collect(java.util.stream.Collectors.toList()); // 3. Recolectamos el resultado en una nueva lista
+    }
 }

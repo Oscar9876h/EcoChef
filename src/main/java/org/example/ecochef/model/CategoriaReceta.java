@@ -18,4 +18,9 @@ public class CategoriaReceta extends EntidadBase {
 
     public String getNombreCategoria() { return nombreCategoria; }
     public void setNombreCategoria(String nombreCategoria) { this.nombreCategoria = nombreCategoria; }
+
+    @Override
+    public String getTipoEntidad() {
+        return "CATEGORIA_RECETA";
+    }
 }

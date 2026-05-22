@@ -30,4 +30,9 @@ public class Favorito extends EntidadBase {
 
     public LocalDateTime getFechaGuardado() { return fechaGuardado; }
     public void setFechaGuardado(LocalDateTime fechaGuardado) { this.fechaGuardado = fechaGuardado; }
+
+    @Override
+    public String getTipoEntidad() {
+        return "FAVORITO";
+    }
 }

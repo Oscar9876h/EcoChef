@@ -35,4 +35,9 @@ public class Inventario extends EntidadBase {
 
     public LocalDate getFechaCaducidad() { return fechaCaducidad; }
     public void setFechaCaducidad(LocalDate fechaCaducidad) { this.fechaCaducidad = fechaCaducidad; }
+
+    @Override
+    public String getTipoEntidad() {
+        return "INVENTARIO";
+    }
 }

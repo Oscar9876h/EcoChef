@@ -15,23 +15,32 @@ public class Usuario extends EntidadBase {
      * Constructor vacío (Sobrecarga 1)
      */
     public Usuario() {
-        super();
+        super(); // Llama al constructor vacío de EntidadBase
     }
 
     /**
      * Constructor completo (Sobrecarga 2)
-     * @param id El ID se pasa a EntidadBase usando super o asignación directa a 'id'
+     * Envía el ID correctamente a EntidadBase usando super(id)
      */
     public Usuario(int id, String nombre, String email, String contrasena, String rol) {
-        this.id = id; // Atributo heredado de EntidadBase
+        super(id); // Pasa el id al constructor de EntidadBase
         this.nombre = nombre;
         this.email = email;
         this.contrasena = contrasena;
         this.rol = rol;
     }
 
+    /**
+     * ⭐ IMPLEMENTACIÓN OBLIGATORIA DEL MÉTODO ABSTRACTO DE ENTIDADBASE
+     * Esto es lo que soluciona el error y hace feliz a IntelliJ.
+     */
+    @Override
+    public String getTipoEntidad() {
+        return "USUARIO";
+    }
+
     // --- GETTERS Y SETTERS ---
-    // Nota: getId() y setId() ya no se escriben aquí, ¡se heredan!
+    // Nota: getId() y setId() no se escriben aquí, ¡se heredan automáticamente!
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -47,6 +56,6 @@ public class Usuario extends EntidadBase {
 
     @Override
     public String toString() {
-        return "Usuario{id=" + id + ", nombre='" + nombre + "', email='" + email + "', rol='" + rol + "'}";
+        return "Usuario{id=" + getId() + ", nombre='" + nombre + "', email='" + email + "', rol='" + rol + "'}";
     }
 }

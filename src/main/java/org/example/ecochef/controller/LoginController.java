@@ -7,7 +7,8 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.ecochef.dao.UsuarioDAOImpl;
 import org.example.ecochef.model.Usuario;
-import org.example.ecochef.model.SesionActiva; // 🌟 IMPORTANTE: Importamos la sesión activa
+import org.example.ecochef.model.SesionActiva;
+import org.example.ecochef.util.ValidacionUtils; // 🌟 NUEVO: Importamos tu nueva clase de utilidades
 
 import java.io.IOException;
 
@@ -35,8 +36,14 @@ public class LoginController {
 
     @FXML
     private void handleLogin() {
-        String email = txtEmail.getText();
+        String email = txtEmail.getText().trim(); // El trim() elimina espacios accidentales
         String pass = txtPassword.getText();
+
+        // 🌟 REQUISITO NUEVO: Validar formato del email antes de mirar la base de datos
+        if (!ValidacionUtils.emailValido(email)) {
+            mostrarAlerta("Formato no válido", "El email debe ser válido (ejemplo@dominio.com).");
+            return; // Detiene la ejecución por completo
+        }
 
         // 1. Buscamos al usuario en la DB (Tu DAO ya devuelve el objeto con su rol de MySQL)
         Usuario usuarioLogueado = usuarioDAO.login(email, pass);
@@ -46,7 +53,6 @@ public class LoginController {
 
             // Guardamos el nombre en la sesión activa
             SesionActiva.nombreUsuarioLogueado = usuarioLogueado.getNombre();
-
 
             if (usuarioLogueado.getRol() != null) {
                 SesionActiva.rolUsuarioLogueado = usuarioLogueado.getRol().toLowerCase().trim();

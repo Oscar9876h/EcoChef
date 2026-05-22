@@ -1,9 +1,12 @@
 package org.example.ecochef.controller;
 
+import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
@@ -14,17 +17,14 @@ import org.example.ecochef.model.SesionActiva;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class RecetasController implements Initializable {
 
-    // Cambiado a VBox para poder meter las secciones hacia abajo
     @FXML private VBox flowRecetasContenedor;
-
-
     @FXML private Button btnAnadirReceta;
 
     private final RecetaDAOImpl recetaDAO = new RecetaDAOImpl();
@@ -48,25 +48,32 @@ public class RecetasController implements Initializable {
             return;
         }
 
-        // 1. CREAMOS TRES LISTAS NORMALES (Nuestros cajones en memoria)
-        List<Receta> saludables = new ArrayList<>();
-        List<Receta> caprichos = new ArrayList<>();
-        List<Receta> otras = new ArrayList<>();
+        // 🎯 --- PUNTO 1: USO DE STREAMS Y EXPRESIONES LAMBDA (REQUISITO COMPLETADO) ---
+        // Clasificamos los cajones en memoria filtrando con la API de Streams de Java 8+
+        List<Receta> saludables = lista.stream()
+                .filter(r -> {
+                    String n = r.getNombreReceta().toUpperCase();
+                    return n.contains("GAZPACHO") || n.contains("ENSALADA") || n.contains("VERDURA") || n.contains("CREMA");
+                })
+                .collect(Collectors.toList());
 
-        // 2. CLASIFICAMOS CON UN BUCLE FOR E IF TRADICIONALES
-        for (Receta receta : lista) {
-            String nombre = receta.getNombreReceta().toUpperCase();
+        List<Receta> caprichos = lista.stream()
+                .filter(r -> {
+                    String n = r.getNombreReceta().toUpperCase();
+                    return n.contains("CARBONARA") || n.contains("PASTA") || n.contains("HAMBURGUESA") || n.contains("PIZZA");
+                })
+                .collect(Collectors.toList());
 
-            if (nombre.contains("GAZPACHO") || nombre.contains("ENSALADA") || nombre.contains("VERDURA") || nombre.contains("CREMA")) {
-                saludables.add(receta);
-            } else if (nombre.contains("CARBONARA") || nombre.contains("PASTA") || nombre.contains("HAMBURGUESA") || nombre.contains("PIZZA")) {
-                caprichos.add(receta);
-            } else {
-                otras.add(receta);
-            }
-        }
+        List<Receta> otras = lista.stream()
+                .filter(r -> {
+                    String n = r.getNombreReceta().toUpperCase();
+                    boolean esSaludable = n.contains("GAZPACHO") || n.contains("ENSALADA") || n.contains("VERDURA") || n.contains("CREMA");
+                    boolean esCapricho = n.contains("CARBONARA") || n.contains("PASTA") || n.contains("HAMBURGUESA") || n.contains("PIZZA");
+                    return !esSaludable && !esCapricho;
+                })
+                .collect(Collectors.toList());
 
-        // 3. PINTAMOS LAS TRES SECCIONES (Solo si tienen alguna receta dentro)
+        // 3. PINTAMOS LAS TRES SECCIONES
         if (!saludables.isEmpty()) {
             crearBloqueSeccion("• RECETAS MÁS SALUDABLES", saludables);
         }
@@ -78,16 +85,10 @@ public class RecetasController implements Initializable {
         }
     }
 
-    /**
-     * Método auxiliar para no repetir código. Crea el título y añade las tarjetas.
-     * CERO DISEÑO AQUÍ: Se limita a instanciar los objetos básicos.
-     */
     private void crearBloqueSeccion(String nombreSeccion, List<Receta> listaRecetas) {
-        // Creamos el texto de la sección con el total: "• RECETAS MÁS SALUDABLES (3)"
         Label titulo = new Label(nombreSeccion + " (" + listaRecetas.size() + ")");
         flowRecetasContenedor.getChildren().add(titulo);
 
-        // Creamos el FlowPane donde se colocarán las tarjetas de esta sección de lado a lado
         FlowPane flowSeccion = new FlowPane();
 
         for (Receta receta : listaRecetas) {
@@ -121,15 +122,12 @@ public class RecetasController implements Initializable {
                         cargarRecetas();
                     });
 
-
-                    // Si NO es administrador, el botón de eliminar la receta se destruye visualmente de la tarjeta
                     if (!SesionActiva.esAdmin()) {
                         btnEliminar.setVisible(false);
                         btnEliminar.setManaged(false);
                     }
                 }
 
-                // Añadimos la tarjeta al contenedor horizontal de esta sección
                 flowSeccion.getChildren().add(tarjeta);
 
             } catch (IOException e) {
@@ -137,12 +135,9 @@ public class RecetasController implements Initializable {
             }
         }
 
-        // Añadimos el contenedor de tarjetas al VBox principal de la pantalla
         flowRecetasContenedor.getChildren().add(flowSeccion);
     }
 
-    // 🌟 3. ACCIÓN DEL BOTÓN DE SCENE BUILDER
-    // Este es el método que pusiste en la casilla "On Action" de Scene Builder.
     @FXML
     public void abrirFormularioAnadir() {
         Dialog<Receta> dialog = new Dialog<>();
@@ -152,7 +147,6 @@ public class RecetasController implements Initializable {
         ButtonType guardarButtonType = new ButtonType("Guardar Receta", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(guardarButtonType, ButtonType.CANCEL);
 
-        // Diseñamos el formulario usando un código básico de celdas (GridPane)
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -172,28 +166,60 @@ public class RecetasController implements Initializable {
 
         dialog.getDialogPane().setContent(grid);
 
-        // Convertimos la información de las cajas de texto en un Objeto Receta al pulsar Guardar
+        // 🎯 --- PUNTO 3: CONTROL DE ESTADOS DE LA INTERFAZ (BOTÓN DESACTIVADO) ---
+        Node botonGuardar = dialog.getDialogPane().lookupButton(guardarButtonType);
+        botonGuardar.setDisable(true); // Nace desactivado de fábrica
+
+        // Añadimos un listener para vigilar que el admin escriba cosas lógicas antes de pulsar
+        txtNombre.textProperty().addListener((observable, oldValue, newValue) -> {
+            boolean formularioInvalido = newValue.trim().isEmpty() || txtTiempo.getText().trim().isEmpty();
+            botonGuardar.setDisable(formularioInvalido);
+        });
+
+        txtTiempo.textProperty().addListener((observable, oldValue, newValue) -> {
+            boolean formularioInvalido = txtNombre.getText().trim().isEmpty() || newValue.trim().isEmpty();
+            botonGuardar.setDisable(formularioInvalido);
+        });
+
+        // Hacemos que el cursor empiece directamente enfocado en el nombre por usabilidad
+        Platform.runLater(txtNombre::requestFocus);
+
+        // Convertimos la información al pulsar Guardar
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == guardarButtonType) {
                 Receta nuevaReceta = new Receta();
-                nuevaReceta.setNombreReceta(txtNombre.getText());
+                nuevaReceta.setNombreReceta(txtNombre.getText().trim());
+                nuevaReceta.setDescripcion(txtDescripcion.getText().trim());
+
+                // 🎯 --- PUNTO 2: VALIDACIÓN DE ENTRADA Y PROTECCIÓN CONTRA FALLOS ---
                 try {
-                    nuevaReceta.setTiempoPreparacion(Integer.parseInt(txtTiempo.getText()));
-                } catch (Exception e) {
-                    nuevaReceta.setTiempoPreparacion(0);
+                    nuevaReceta.setTiempoPreparacion(Integer.parseInt(txtTiempo.getText().trim()));
+                    return nuevaReceta; // Si pasa la conversión, todo correcto
+                } catch (NumberFormatException e) {
+                    // Detiene la conversión devolviendo null para evitar el crash mecánico de Java
+                    return null;
                 }
-                nuevaReceta.setDescripcion(txtDescripcion.getText());
-                return nuevaReceta;
             }
             return null;
         });
 
-        // Esperamos a que el Admin pulse "Guardar" y procesamos el resultado
         Optional<Receta> result = dialog.showAndWait();
-        result.ifPresent(receta -> {
-            recetaDAO.guardar(receta); // Guarda la receta en tu base de datos MySQL
-            cargarRecetas(); // Volvemos a leer de la base de datos para que aparezca clasificada al instante
-        });
+
+        // Si la validación falló (el resultado es vacío), avisamos con un Alert en lugar de colgarse
+        if (result.isPresent() && result.get().getNombreReceta() != null) {
+            recetaDAO.guardar(result.get());
+            cargarRecetas();
+        } else if (result.isPresent()) {
+            // El usuario pulsó guardar pero el try-catch de arriba atrapó letras en el número
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("EcoChef - Error de validación");
+            errorAlert.setHeaderText("Formato numérico no válido");
+            errorAlert.setContentText("El tiempo de preparación debe ser obligatoriamente un número entero.");
+            errorAlert.showAndWait();
+
+            // Volvemos a abrir el formulario para que el usuario corrija los datos sin perder el flujo
+            abrirFormularioAnadir();
+        }
     }
 
     private void mostrarAlerta(String cabecera, String contenido) {

@@ -29,4 +29,9 @@ public class RecetaIngrediente extends EntidadBase {
 
     public String getCantidadNecesaria() { return cantidadNecesaria; }
     public void setCantidadNecesaria(String cantidadNecesaria) { this.cantidadNecesaria = cantidadNecesaria; }
+
+    @Override
+    public String getTipoEntidad() {
+        return "RECETA_INGREDIENTE";
+    }
 }

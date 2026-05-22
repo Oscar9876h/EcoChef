@@ -23,4 +23,9 @@ public class RecetaCategoria extends EntidadBase {
 
     public int getIdCategoriaReceta() { return idCategoriaReceta; }
     public void setIdCategoriaReceta(int idCategoriaReceta) { this.idCategoriaReceta = idCategoriaReceta; }
+
+    @Override
+    public String getTipoEntidad() {
+        return "RECETA_CATEGORIA";
+    }
 }
