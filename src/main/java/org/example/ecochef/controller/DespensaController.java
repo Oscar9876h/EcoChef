@@ -81,7 +81,7 @@ public class DespensaController implements Initializable {
     /**
      * Carga el archivo FXML de la tarjeta individual y le asigna los datos del alimento.
      * @param alimento El alimento a mostrar en la tarjeta.
-     * @return El componente visual (Node) de la tarjeta configurada.
+     * @return El componente visual de la tarjeta configurada.
      */
     private Node cargarTarjeta(Alimento alimento) {
         try {
@@ -114,21 +114,27 @@ public class DespensaController implements Initializable {
     /**
      * Abre una ventana modal para introducir un nuevo alimento.
      */
+    /**
+     * Abre una ventana modal para introducir un nuevo alimento.
+     */
     @FXML
     public void abrirFormularioAnadir() {
         try {
+            // Usamos la ruta estándar que ya tenías y funcionaba
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/formulario-alimento.fxml"));
             Parent root = loader.load();
 
             Stage stage = new Stage();
             stage.setTitle("Añadir nuevo alimento");
-            stage.initModality(Modality.APPLICATION_MODAL); // Bloquea la ventana principal hasta cerrar esta
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.showAndWait();
 
-            cargarDespensa(); // Al cerrar el formulario, refrescamos la despensa
+            // Refrescamos la despensa al cerrar el formulario
+            cargarDespensa();
         } catch (IOException e) {
             System.err.println("Error al abrir formulario: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

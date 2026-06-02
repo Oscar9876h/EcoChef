@@ -55,7 +55,7 @@ public class UsuarioDAOImpl implements Dao<Usuario> {
             if (rs.next()) {
                 Usuario user = new Usuario();
 
-                // Mapeo de campos desde la base de datos al modelo
+                // Mapa de campos desde la base de datos al modelo
                 user.setId(rs.getInt("idusuarios"));
                 user.setNombre(rs.getString("nombre"));
                 user.setEmail(rs.getString("email"));
