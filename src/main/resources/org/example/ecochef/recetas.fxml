@@ -4,21 +4,17 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" spacing="15.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.ecochef.controller.RecetasController">
+<VBox fx:id="flowRecetasContenedor" alignment="TOP_CENTER" spacing="15.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.ecochef.controller.RecetasController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
     <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Libro de Recetas" />
    <Button fx:id="btnAnadirReceta" mnemonicParsing="false" onAction="#abrirFormularioAnadir" text="Añadir receta" />
-
-    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-        <content>
-            <VBox fx:id="flowRecetasContenedor" spacing="20.0" style="-fx-background-color: transparent;">
-                <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                </padding>
-            </VBox>
-        </content>
-    </ScrollPane>
+   <TableView fx:id="tablaRecetas" prefHeight="200.0" prefWidth="200.0">
+     <columns>
+       <TableColumn fx:id="colId" prefWidth="75.0" text="Id" />
+       <TableColumn fx:id="colNombre" prefWidth="75.0" text="Nombre de receta" />
+     </columns>
+   </TableView>
 </VBox>

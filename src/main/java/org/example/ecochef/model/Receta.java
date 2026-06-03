@@ -1,34 +1,20 @@
 package org.example.ecochef.model;
 
-/**
- * Clase que representa una receta en el sistema.
- * CUMPLE REQUISITO: Herencia de EntidadBase y Relación 1:N (un Usuario crea la receta).
- */
+import javafx.beans.property.*; // IMPORTANTE: Necesitas esto para JavaFX
+
 public class Receta extends EntidadBase {
 
     private String nombreReceta;
     private String descripcion;
     private int tiempoPreparacion;
-
-    // REQUISITO: Relación entre objetos (Asociación 1:N)
-    // Una receta tiene un autor (Usuario)
     private Usuario usuario;
 
-    /**
-     * Constructor vacío (Sobrecarga 1)
-     * Llama al constructor de EntidadBase.
-     */
     public Receta() {
         super();
     }
 
-    /**
-     * Constructor completo (Sobrecarga 2)
-     * @param id Atributo heredado
-     * @param usuario Objeto relacionado
-     */
     public Receta(int id, String nombreReceta, String descripcion, int tiempoPreparacion, Usuario usuario) {
-        super(id); // REQUISITO: Llamada al constructor padre
+        super(id);
         this.nombreReceta = nombreReceta;
         this.descripcion = descripcion;
         this.tiempoPreparacion = tiempoPreparacion;
@@ -36,12 +22,9 @@ public class Receta extends EntidadBase {
     }
 
     @Override
-    public String getTipoEntidad() {
-        return "Receta de Cocina";
-    }
+    public String getTipoEntidad() { return "Receta de Cocina"; }
 
-    // --- GETTERS Y SETTERS ---
-
+    // --- GETTERS Y SETTERS TRADICIONALES ---
     public String getNombreReceta() { return nombreReceta; }
     public void setNombreReceta(String nombreReceta) { this.nombreReceta = nombreReceta; }
 
@@ -51,13 +34,23 @@ public class Receta extends EntidadBase {
     public int getTiempoPreparacion() { return tiempoPreparacion; }
     public void setTiempoPreparacion(int tiempoPreparacion) { this.tiempoPreparacion = tiempoPreparacion; }
 
-    // Getter y Setter para el objeto relacionado
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
+    // --- MÉTODOS PROPERTY PARA JAVAFX TABLEVIEW ---
+
+    // Para el ID (que viene de EntidadBase, asumimos que tienes getId())
+    public IntegerProperty idProperty() {
+        return new SimpleIntegerProperty(this.getId());
+    }
+
+    // Para el nombre de la receta
+    public StringProperty nombreRecetaProperty() {
+        return new SimpleStringProperty(this.nombreReceta);
+    }
+
     @Override
     public String toString() {
-        return "Receta{id=" + id + ", nombre='" + nombreReceta + "', autor=" +
-                (usuario != null ? usuario.getNombre() : "Sin autor") + "}";
+        return "Receta{id=" + id + ", nombre='" + nombreReceta + "'}";
     }
 }

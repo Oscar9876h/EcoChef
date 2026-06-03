@@ -1,6 +1,5 @@
 package org.example.ecochef.controller;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -18,32 +17,44 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-/**
- * Controlador de la vista de Recetas.
- * Se encarga de mostrar las recetas clasificadas por categorías (Saludables, Caprichos, etc.)
- * y gestionar la interacción con el usuario dependiendo de sus privilegios.
- */
 public class RecetasController implements Initializable {
 
-    @FXML private VBox flowRecetasContenedor; // Contenedor vertical de todas las secciones
-    @FXML private Button btnAnadirReceta;    // Botón visible solo para administradores
+    // Contenedores existentes
+    @FXML private VBox flowRecetasContenedor;
+    @FXML private Button btnAnadirReceta;
+
+    // Elementos de la tabla que ya tienes en tu FXML
+    @FXML private TableView<Receta> tablaRecetas;
+    @FXML private TableColumn<Receta, Integer> colId;
+    @FXML private TableColumn<Receta, String> colNombre;
 
     private final RecetaDAOImpl recetaDAO = new RecetaDAOImpl();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Control de acceso: Ocultar botones de gestión si el usuario no es admin
+        // Control de visibilidad
         if (!SesionActiva.esAdmin()) {
             btnAnadirReceta.setVisible(false);
             btnAnadirReceta.setManaged(false);
+            tablaRecetas.setVisible(false);
+            tablaRecetas.setManaged(false);
         }
+
+        // Configuración de la tabla
+        colId.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
+        colNombre.setCellValueFactory(cellData -> cellData.getValue().nombreRecetaProperty());
+
         cargarRecetas();
     }
 
-    /**
-     * Recupera todas las recetas de la BD, las clasifica mediante filtrado
-     * y las añade a la vista organizada por bloques.
-     */
+    // Botón que carga los datos en la tabla (asociado en Scene Builder al botón)
+    @FXML
+    public void abrirFormularioAnadir() {
+        tablaRecetas.getItems().setAll(recetaDAO.listarTodos());
+    }
+
+    // --- TU LÓGICA ORIGINAL SE MANTIENE ABAJO ---
+
     public void cargarRecetas() {
         List<Receta> lista = recetaDAO.listarTodos();
         flowRecetasContenedor.getChildren().clear();
@@ -53,20 +64,15 @@ public class RecetasController implements Initializable {
             return;
         }
 
-        // Clasificación lógica de recetas basada en palabras clave
         List<Receta> saludables = filtrarPorKeywords(lista, "GAZPACHO", "ENSALADA", "VERDURA", "CREMA");
         List<Receta> caprichos = filtrarPorKeywords(lista, "CARBONARA", "PASTA", "HAMBURGUESA", "PIZZA");
         List<Receta> otras = lista.stream().filter(r -> !saludables.contains(r) && !caprichos.contains(r)).collect(Collectors.toList());
 
-        // Generar secciones en la UI solo si contienen elementos
         if (!saludables.isEmpty()) crearBloqueSeccion("RECETAS SALUDABLES", saludables);
         if (!caprichos.isEmpty()) crearBloqueSeccion("OPCIONES MENOS SALUDABLES", caprichos);
         if (!otras.isEmpty()) crearBloqueSeccion("OTRAS PROPUESTAS", otras);
     }
 
-    /**
-     * Filtra una lista de recetas basándose en si su nombre contiene alguna de las palabras clave.
-     */
     private List<Receta> filtrarPorKeywords(List<Receta> lista, String... keywords) {
         return lista.stream().filter(r -> {
             String n = r.getNombreReceta().toUpperCase();
@@ -75,9 +81,6 @@ public class RecetasController implements Initializable {
         }).collect(Collectors.toList());
     }
 
-    /**
-     * Crea un título de sección y un contenedor para las tarjetas correspondientes.
-     */
     private void crearBloqueSeccion(String titulo, List<Receta> lista) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/seccion-titulo.fxml"));
@@ -95,15 +98,11 @@ public class RecetasController implements Initializable {
         flowRecetasContenedor.getChildren().add(flowSeccion);
     }
 
-    /**
-     * Carga y personaliza la tarjeta visual (FXML) para una receta específica.
-     */
     private Node cargarTarjeta(Receta receta) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/tarjeta-receta.fxml"));
             VBox tarjeta = loader.load();
 
-            // Referencia a los componentes del FXML para asignar datos
             Label lbNombre = (Label) tarjeta.lookup("#lbNombre");
             Label lbTiempo = (Label) tarjeta.lookup("#lbTiempo");
             Label lbDesc = (Label) tarjeta.lookup("#lbDesc");
@@ -114,7 +113,6 @@ public class RecetasController implements Initializable {
             if (lbTiempo != null) lbTiempo.setText("⏱ " + receta.getTiempoPreparacion() + " min");
             if (lbDesc != null) lbDesc.setText(receta.getDescripcion());
 
-            // Acción: Verificar si los ingredientes están disponibles en la despensa
             if (btnCheck != null) {
                 btnCheck.setOnAction(event -> {
                     String disponibilidad = recetaDAO.comprobarDisponibilidad(receta.getId());
@@ -122,11 +120,10 @@ public class RecetasController implements Initializable {
                 });
             }
 
-            // Acción: Eliminar receta (Solo visible para admins)
             if (btnEliminar != null) {
                 btnEliminar.setOnAction(event -> {
                     recetaDAO.eliminar(receta.getId());
-                    cargarRecetas(); // Refrescar vista
+                    cargarRecetas();
                 });
                 if (!SesionActiva.esAdmin()) {
                     btnEliminar.setVisible(false);
@@ -145,10 +142,5 @@ public class RecetasController implements Initializable {
         alert.setHeaderText(cabecera);
         alert.setContentText(contenido);
         alert.showAndWait();
-    }
-
-    @FXML
-    public void abrirFormularioAnadir() {
-        System.out.println("Formulario abierto");
     }
 }

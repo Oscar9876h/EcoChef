@@ -12,7 +12,6 @@ import java.util.List;
 public class FormularioAlimento {
 
     @FXML private TextField txtNombre;
-    @FXML private TextField txtTipo;
     @FXML private TextField txtCalorias;
     @FXML private DatePicker dateCaducidad;
     @FXML private ComboBox<String> comboCategorias;
@@ -34,42 +33,29 @@ public class FormularioAlimento {
     private void guardar() {
         try {
             String nombre = txtNombre.getText();
-            String tipo = txtTipo.getText();
             int calorias = txtCalorias.getText().isEmpty() ? 0 : Integer.parseInt(txtCalorias.getText());
             LocalDate caducidad = dateCaducidad.getValue();
-            String nombreCategoria = comboCategorias.getValue();
+            String nombreCategoria = comboCategorias.getValue(); // Esto es el "tipo"
 
             if (!nombre.isEmpty() && caducidad != null && nombreCategoria != null) {
-                // Buscamos el ID real de la categoría seleccionada
                 int idCategoria = categoriaDAO.obtenerIdPorNombre(nombreCategoria);
 
-                // Creamos y guardamos el alimento con el ID correcto
-                Alimento nuevoAlimento = new Alimento(0, nombre, tipo, calorias, idCategoria, caducidad);
+                // Usamos nombreCategoria como el "tipo"
+                Alimento nuevoAlimento = new Alimento(0, nombre, nombreCategoria, calorias, idCategoria, caducidad);
                 alimentoDAO.guardar(nuevoAlimento);
 
                 cerrarVentana();
             } else {
-                mostrarAlerta("Campos incompletos", "Por favor, selecciona una categoría y rellena los datos obligatorios.");
+                mostrarAlerta("Campos incompletos", "Por favor, rellena todos los datos.");
             }
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error de formato", "Las calorías deben ser un número válido.");
+            mostrarAlerta("Error", "Las calorías deben ser un número.");
         }
     }
 
-    @FXML
-    private void cancelar() {
-        cerrarVentana();
-    }
-
-    private void cerrarVentana() {
-        Stage stage = (Stage) txtNombre.getScene().getWindow();
-        stage.close();
-    }
-
-    private void mostrarAlerta(String titulo, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(titulo);
-        alert.setContentText(contenido);
-        alert.showAndWait();
+    @FXML private void cancelar() { cerrarVentana(); }
+    private void cerrarVentana() { ((Stage) txtNombre.getScene().getWindow()).close(); }
+    private void mostrarAlerta(String t, String c) {
+        Alert a = new Alert(Alert.AlertType.ERROR); a.setTitle(t); a.setContentText(c); a.showAndWait();
     }
 }

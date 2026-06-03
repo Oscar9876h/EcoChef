@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.collections.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
@@ -21,14 +19,6 @@
     </Label>
 
     <Label text="Selecciona tu perfil:" />
-    <ComboBox fx:id="comboTipoUsuario" prefWidth="200.0" promptText="Tipo de Usuario">
-        <items>
-            <FXCollections fx:factory="observableArrayList">
-                <String fx:value="USUARIO" />
-                <String fx:value="ADMIN" />
-            </FXCollections>
-        </items>
-    </ComboBox>
 
     <TextField fx:id="txtNombre" promptText="Nombre de usuario" />
     <TextField fx:id="txtEmail" promptText="Correo electrónico" />
