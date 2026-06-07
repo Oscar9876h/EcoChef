@@ -14,8 +14,7 @@ import java.io.IOException;
 
 /**
  * Controlador de la vista de Login.
- * Gestiona la autenticación de usuarios, la validación de formatos y
- * la inicialización de la sesión activa al acceder al sistema.
+ * Gestiona la autenticación y la inicialización de la sesión global.
  */
 public class LoginController {
 
@@ -25,10 +24,6 @@ public class LoginController {
 
     private final UsuarioDAOImpl usuarioDAO = new UsuarioDAOImpl();
 
-    /**
-     * Configura los listeners para habilitar el botón de login solo
-     * cuando los campos obligatorios contienen texto.
-     */
     @FXML
     public void initialize() {
         btnLogin.setDisable(true);
@@ -36,39 +31,30 @@ public class LoginController {
         txtPassword.textProperty().addListener((obs, old, newValue) -> validarBoton());
     }
 
-    /**
-     * Determina el estado del botón de inicio de sesión según el contenido de los campos.
-     */
     private void validarBoton() {
         boolean camposVacios = txtEmail.getText().trim().isEmpty() ||
                 txtPassword.getText().trim().isEmpty();
         btnLogin.setDisable(camposVacios);
     }
 
-    /**
-     * Procesa la autenticación llamando al DAO.
-     * Utiliza la clase ValidacionUtils para asegurar la integridad de los datos antes de consultar la BBDD.
-     */
     @FXML
     private void handleLogin() {
         String email = txtEmail.getText().trim();
         String pass = txtPassword.getText();
 
-        // Validamos el formato del email antes de consultar la persistencia
         if (!ValidacionUtils.emailValido(email)) {
             mostrarAlerta("Formato no válido", "El email debe ser válido (ejemplo@dominio.com).");
             return;
         }
 
-        // Ejecución de login mediante el DAO
         Usuario usuarioLogueado = usuarioDAO.login(email, pass);
 
         if (usuarioLogueado != null) {
-            // Gestión de sesión: se almacenan los datos del usuario en la clase estática de sesión
+            // Guardamos nombre y rol. Convertimos a mayúsculas para asegurar coincidencia total.
             SesionActiva.nombreUsuarioLogueado = usuarioLogueado.getNombre();
             SesionActiva.rolUsuarioLogueado = (usuarioLogueado.getRol() != null)
-                    ? usuarioLogueado.getRol().toLowerCase().trim()
-                    : "usuario";
+                    ? usuarioLogueado.getRol().toUpperCase().trim()
+                    : "USUARIO";
 
             irAMenuPrincipal();
         } else {
@@ -76,9 +62,6 @@ public class LoginController {
         }
     }
 
-    /**
-     * Realiza el cambio de escena hacia la ventana principal (HelloView).
-     */
     private void irAMenuPrincipal() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/ecochef/hello-view.fxml"));
@@ -91,11 +74,6 @@ public class LoginController {
         }
     }
 
-    /**
-     * Muestra alertas de error al usuario mediante componentes del sistema.
-     * @param titulo Título de la ventana de alerta.
-     * @param mensaje Descripción del error.
-     */
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titulo);
